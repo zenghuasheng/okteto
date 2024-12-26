@@ -14,10 +14,12 @@
 package registry
 
 import (
+	"context"
 	"crypto/x509"
 	"errors"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/google/go-containerregistry/pkg/authn"
 	"github.com/google/go-containerregistry/pkg/name"
@@ -158,7 +160,9 @@ func (c client) isNotFound(err error) bool {
 }
 
 func (c client) getOptions(ref name.Reference) []remote.Option {
-	return []remote.Option{c.getAuthentication(ref), c.getTransportOption()}
+	ctx, _ := context.WithTimeout(context.Background(), 1*time.Second)
+	contextOption := remote.WithContext(ctx)
+	return []remote.Option{c.getAuthentication(ref), c.getTransportOption(), contextOption}
 }
 
 func (c client) getAuthHelper(_ name.Reference) authn.Keychain {
